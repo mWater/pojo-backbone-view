@@ -9,7 +9,7 @@ module.exports = class TemplateStatePreserver
   apply: (element, html) ->
     savedElems = {}
 
-    focusables = "input[type='text'],input[type='number'],select,button,a"
+    focusables = "input[type='text'],input[type='number'],select,button,a,textarea"
 
     # Find focusables in old html and detach
     for input in $(element).find(focusables)

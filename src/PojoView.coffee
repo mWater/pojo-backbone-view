@@ -84,6 +84,10 @@ module.exports = class PojoView extends Backbone.View
       if subView.view?
         subView.view.render()
 
+  forceRender: ->
+    @renderNeeded = true
+    @render()
+
   render: (renderOnlySelf = false) ->
     # Check if model changed
     if not @renderNeeded and _.isEqual(@model, @savedModel)
