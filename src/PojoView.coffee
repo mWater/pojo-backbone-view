@@ -17,6 +17,9 @@ module.exports = class PojoView extends Backbone.View
 
     @renderNeeded = false  # Set true when render is needed due to subview manipulation
 
+  scope: ->
+    return @model
+
   # Add a subView. Render must be called after.
   # id is the DOM id where the subview will be inserted
   # factory takes a submodel parameter (from modelFunc) and produces a view
@@ -90,7 +93,7 @@ module.exports = class PojoView extends Backbone.View
 
   render: (renderOnlySelf = false) ->
     # Check if model changed
-    if not @renderNeeded and _.isEqual(@model, @savedModel)
+    if not @renderNeeded and _.isEqual(@scope(), @savedScope)
       # Just render subViews
       if not renderOnlySelf
         @renderSubViews()
@@ -126,8 +129,8 @@ module.exports = class PojoView extends Backbone.View
       $(focused).css("transition", "")
       $(focused).css("-webkit-transition", "")
 
-    # Save model
-    @savedModel = _.cloneDeep(@model)
+    # Save model scope
+    @savedScope = _.cloneDeep(@scope())
 
     return this
 

@@ -32,6 +32,8 @@ modelFunc: optional function which returns the model object on which the subview
 
 When the view modifies the model object, it *must* call dirty() afterwards which triggers a smart re-render of the entire tree of views. Views whose model has not changed are left alone.
 
+Override `scope` function which by default returns the model to determine which object is used for dirty checking.
+
 ### PojoListView
 
 A view for Javascript arrays.

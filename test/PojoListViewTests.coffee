@@ -81,10 +81,18 @@ describe 'PojoListView', ->
     changed = false
     @listView.on 'change', -> changed = true
 
-    # Indicate reorder
+    # Indicate change
     @listView.itemViews[0].trigger 'change'
 
     assert changed
+
+  it 'renders on item change', ->
+    spy = sinon.spy(@listView, "render")
+
+    # Indicate change
+    @listView.itemViews[0].trigger 'change'
+
+    assert spy.calledOnce
 
   it "rerenders when dirty is called", ->
     spy = sinon.spy(@listView, "render")

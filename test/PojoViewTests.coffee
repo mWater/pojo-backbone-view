@@ -21,7 +21,8 @@ class SimplePojoView extends PojoView
 
 describe "PojoView", ->
   beforeEach ->
-    @pview = new SimplePojoView(model: {a: {x:1}}).render()
+    @model = {a: {x:1}}
+    @pview = new SimplePojoView(model: @model).render()
 
   it "adds subviews", ->
     @pview.addSubView "a", -> 
@@ -46,6 +47,28 @@ describe "PojoView", ->
     spy = sinon.spy(@pview, "template")
 
     @pview.model.b = 2
+    @pview.render()
+
+    assert spy.calledOnce
+
+  it "respects scope unchanged", ->
+    @pview.scope = -> {x:1}
+    @pview.render()
+
+    spy = sinon.spy(@pview, "template")
+
+    @pview.model.b = 2
+    @pview.render()
+
+    assert not spy.called
+
+  it "respects scope changed", ->
+    @pview.scope = -> {x:1}
+    @pview.render()
+
+    spy = sinon.spy(@pview, "template")
+
+    @pview.scope = -> {x:2}
     @pview.render()
 
     assert spy.calledOnce
