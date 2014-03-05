@@ -44,6 +44,7 @@ module.exports = class PojoListView extends Backbone.View
 
         # Listen to change events
         @itemViews[i].on 'change', =>
+          @render()
           @trigger 'change'
 
     # Remove excess itemViews
