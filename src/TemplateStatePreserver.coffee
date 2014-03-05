@@ -39,8 +39,9 @@ module.exports = class TemplateStatePreserver
         # Copy value across
         $(oldInput).val($(input).val())
 
-        # Copy contents across
-        $(oldInput).html($(input).html())        
+        # Copy contents across for buttons and links
+        if input.tagName == "BUTTON" or input.tagName == "A"
+          $(oldInput).html($(input).html())        
 
         # Replace new control with old
         $(input).replaceWith(oldInput)
