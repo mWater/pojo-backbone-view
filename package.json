@@ -26,11 +26,11 @@
     "lodash": "~2.4.1",
     "chai": "~1.9.0",
     "testem": "~0.6.7",
-    "sinon": "~1.8.2"
+    "sinon": "~1.8.2",
+    "coffeeify": "~0.6.0",
+    "browserify": "~3.29.0"
   },
   "dependencies": {
-    "coffeeify": "~0.6.0",
-    "browserify": "~3.29.0",
     "jquery": "~2.1.0",
     "backbone": "~1.1.2"
   }
