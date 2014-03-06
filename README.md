@@ -48,3 +48,8 @@ index: 0-based index of the array item
 returns: new Backbone view
 
 When the view modifies the model object, it *must* call dirty() afterwards which triggers a smart re-render of the entire tree of views. Views whose model has not changed are left alone.
+
+
+## Samples
+
+See `demo` folder
