@@ -4,7 +4,7 @@ Backbone Views that use Plain Old Javascript Objects and dirty checking
 
 ## Rationale
 
-Backbone Models are a pain when manipulating complex and deeply nested Javascript objects. If you want to create Meteor-style views that use templates and properly preserve inputs with all the handiness of Angular.JS dirty checking, then POJO Backbone View is the thing for you.
+Backbone Models are painful when manipulating complex and deeply nested Javascript objects. If you want to create Meteor-style views that use templates and properly preserve inputs with all the handiness of Angular.JS dirty checking, then POJO Backbone View is the thing for you.
 
 ## Dependencies
 
