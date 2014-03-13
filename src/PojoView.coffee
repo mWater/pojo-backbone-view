@@ -1,8 +1,7 @@
 _ = require 'lodash'
 $ = require 'jquery'
 Backbone = require 'backbone'
-
-TemplateStatePreserver = require './TemplateStatePreserver'
+htmlPreserver = require './htmlPreserver'
 
 module.exports = class PojoView extends Backbone.View
   constructor: (options) ->
@@ -11,8 +10,6 @@ module.exports = class PojoView extends Backbone.View
     # Save ctx option as nested views often need a context
     @ctx = options.ctx
     
-    @statePreserver = new TemplateStatePreserver()
-
     @subViews = []  # Each contains id, factory, modelFunc, model, view
 
     @renderNeeded = false  # Set true when render is needed due to subview manipulation
@@ -101,33 +98,19 @@ module.exports = class PojoView extends Backbone.View
 
     @renderNeeded = false
 
-    # Save focused element
-    focused = document.activeElement
+    # Save focus and scroll
+    htmlPreserver.preserveFocus =>
+      # Detach all subviews
+      for subView in @subViews
+        if subView.view?
+          subView.view.$el.detach()
 
-    # Turn off transitions on focused element
-    if focused?
-      $(focused).css("transition", "none")
-      $(focused).css("-webkit-transition", "none")
+      # Apply template, preserving state
+      htmlPreserver.replaceHtml(@$el, @template(@model))
 
-    # Detach all subviews
-    for subView in @subViews
-      if subView.view?
-        subView.view.$el.detach()
-
-    # Apply template, preserving state
-    @statePreserver.apply(@$el, @template(@model))
-
-    # For each subview
-    for subView in @subViews
-      @_processSubView subView, @$el, renderOnlySelf
-
-    if focused?
-      # Set focus back
-      $(focused).focus()
-  
-      # Turn back on transitions on focused element
-      $(focused).css("transition", "")
-      $(focused).css("-webkit-transition", "")
+      # For each subview
+      for subView in @subViews
+        @_processSubView subView, @$el, renderOnlySelf
 
     # Save model scope
     @savedScope = _.cloneDeep(@scope())

@@ -1,5 +1,6 @@
 $ = require 'jquery'
 Backbone = require 'backbone'
+htmlPreserver = require './htmlPreserver'
 
 # Assumes that order of views might be important, so re-creates all on re-order
 # To use, implement createItemView(item, zeroBasedIndex)
@@ -17,65 +18,51 @@ module.exports = class PojoListView extends Backbone.View
     @itemModels = []
 
   render: ->
-    # Save focused element
-    focused = document.activeElement
+    # Save focus and scroll
+    htmlPreserver.preserveFocus =>
+      # For each model item
+      for i in [0...@model.length]
+        # Check if item model is same
+        if @itemModels[i] == @model[i]
+          # Render itemView
+          @itemViews[i].render()
 
-    # Turn off transitions on focused element
-    if focused?
-      $(focused).css("transition", "none")
-      $(focused).css("-webkit-transition", "none")
+          # Detach element
+          @itemViews[i].$el.detach()
+        else
+          # Remove old view
+          if @itemViews[i]?
+            @itemViews[i].remove()
 
-    # For each model item
-    for i in [0...@model.length]
-      # Check if item model is same
-      if @itemModels[i] == @model[i]
-        # Render itemView
-        @itemViews[i].render()
+          # Create new element
+          @itemViews[i] = @createItemView(@model[i], i)
 
-        # Detach element
-        @itemViews[i].$el.detach()
-      else
-        # Remove old view
-        if @itemViews[i]?
-          @itemViews[i].remove()
+          # Listen to change events
+          @itemViews[i].on 'change', =>
+            @render()
+            @trigger 'change'
 
-        # Create new element
-        @itemViews[i] = @createItemView(@model[i], i)
+      # Remove excess itemViews
+      for i in [@model.length...@itemViews.length]
+        @itemViews[i].remove()
 
-        # Listen to change events
-        @itemViews[i].on 'change', =>
-          @render()
-          @trigger 'change'
+      # Truncate itemViews array
+      if @model.length<@itemViews.length
+        @itemViews.splice(@model.length, @itemViews.length - @model.length)
 
-    # Remove excess itemViews
-    for i in [@model.length...@itemViews.length]
-      @itemViews[i].remove()
+      # Create template for each model item
+      @$el.empty()
 
-    # Truncate itemViews array
-    if @model.length<@itemViews.length
-      @itemViews.splice(@model.length, @itemViews.length - @model.length)
+      for i in [0...@model.length]
+        # Create item
+        item = $('<li data-index="'+i+'"></li>')
+        if @itemClass
+          item.addClass(@itemClass)
 
-    # Create template for each model item
-    @$el.empty()
+        # Add itemView to item
+        item.append(@itemViews[i].$el)
 
-    for i in [0...@model.length]
-      # Create item
-      item = $('<li data-index="'+i+'"></li>')
-      if @itemClass
-        item.addClass(@itemClass)
-
-      # Add itemView to item
-      item.append(@itemViews[i].$el)
-
-      @$el.append(item) 
-
-    if focused?
-      # Set focus back
-      $(focused).focus()
-  
-      # Turn back on transitions on focused element
-      $(focused).css("transition", "")
-      $(focused).css("-webkit-transition", "")
+        @$el.append(item) 
 
     # Save item models
     @itemModels = @model.slice(0)
