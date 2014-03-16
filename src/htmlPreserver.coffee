@@ -69,8 +69,8 @@ exports.replaceHtml = (element, html) ->
       if oldValue != newValue
         $(oldInput).val(newValue)
 
-      # Copy contents across for buttons and links
-      if input.tagName == "BUTTON" or input.tagName == "A"
+      # Copy contents across for buttons and links and selects
+      if input.tagName == "BUTTON" or input.tagName == "A" or input.tagName == "SELECT"
         $(oldInput).html($(input).html())        
 
       # Replace new control with old
