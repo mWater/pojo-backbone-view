@@ -63,15 +63,15 @@ exports.replaceHtml = (element, html) ->
         if attr.name isnt "value"
           $(oldInput).attr(attr.name, attr.value)
 
+      # Copy contents across for buttons and links and selects
+      if input.tagName == "BUTTON" or input.tagName == "A" or input.tagName == "SELECT"
+        $(oldInput).html($(input).html())        
+
       # Copy value across if different
       newValue = $(input).val()
       oldValue = $(oldInput).val()
       if oldValue != newValue
         $(oldInput).val(newValue)
-
-      # Copy contents across for buttons and links and selects
-      if input.tagName == "BUTTON" or input.tagName == "A" or input.tagName == "SELECT"
-        $(oldInput).html($(input).html())        
 
       # Replace new control with old
       $(input).replaceWith(oldInput)
