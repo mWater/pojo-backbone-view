@@ -1,12 +1,16 @@
 {
   "name": "pojo-backbone-view",
-  "version": "0.1.5",
+  "version": "0.1.5", 
   "description": "Backbone Views that use Plain Old Javascript Objects and dirty checking",
   "main": "index.js",
+  "style": "asset/css/index.css",
   "scripts": {
     "test": "testem ci",
     "prepublish": "coffee -c -o lib src/*.coffee"
   },
+  "directories": {
+       "lib": "src"
+   }, 
   "repository": {
     "type": "git",
     "url": "https://github.com/mWater/pojo-backbone-view.git"
@@ -32,6 +36,7 @@
   },
   "dependencies": {
     "jquery": "~2.1.0",
-    "backbone": "~1.1.2"
+    "backbone": "~1.1.2",
+    "grunt-cli": "^0.1.13"
   }
 }

@@ -7,7 +7,7 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'index.js': ['src/demo.coffee']
+          'index.js': ['src/demo.coffee', 'src/lib/jquery.sortable.js']
         },
         options: {
           extensions: [ '.coffee', '.js' ],
@@ -17,9 +17,12 @@ module.exports = function(grunt) {
             ]
         }
       }
-    }
+    },
+
   });
 
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.registerTask('default', ['browserify']);
+
+  grunt.registerTask('default', ['browserify']);  
+
 };

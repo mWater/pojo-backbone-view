@@ -3,34 +3,56 @@ Backbone = require 'backbone'
 
 # Assumes that order of views might be important, so re-creates all on re-order
 # To use, implement createItemView(item, zeroBasedIndex)
-
+ 
 module.exports = class PojoListView extends Backbone.View
-  tagName: "ul"
-
+  tagName: "ul" 
+    
   constructor: (options) ->
     super(options)
-    
+    console.log(options.sortable);
+    console.log(options.sortHandle);
+    @manageSortable(options.sortable, options.sortHandle)
+
     # Save ctx option as nested views often need a context
     @ctx = options.ctx
-
+   
     @itemViews = []
-    @itemModels = []
+    @itemModels = []  
 
-  render: ->
+  #check argument boolean value   
+  manageSortable: (sortable, sortHandle) ->
+    if sortable is 'false'
+      @$el.addClass 'sortable' #set the style class of the list 
+      $(document).ready ->
+        jQuery ($) ->
+          $('.sortable').sortable('disable')
+    else if sortable is 'true'
+      if sortHandle is 'true'       
+        $el.addClass 'sortable handles list'
+        $(document).ready ->
+          jQuery ($) ->
+            $('.sortable').sortable(handle: '.handles').bind 'sortupdate', @reorder 
+      else
+        @$el.addClass 'sortable'        
+        $(document).ready -> 
+          ($) ->
+            $('.sortable').sortable().bind 'sortupdate', @reorder
+
+  render: ->      
     # Save focused element
-    focused = document.activeElement
+    @focused = document.activeElement  
 
     # Turn off transitions on focused element
     if focused?
       $(focused).css("transition", "none")
       $(focused).css("-webkit-transition", "none")
-
+  
     # For each model item
     for i in [0...@model.length]
       # Check if item model is same
-      if @itemModels[i] == @model[i]
+      if @itemModels[i] == @model[i]        
         # Render itemView
-        @itemViews[i].render()
+        @itemViews[i].render()       
 
         # Detach element
         @itemViews[i].$el.detach()
@@ -86,7 +108,6 @@ module.exports = class PojoListView extends Backbone.View
   reorder: =>
     # Copy model
     modelCopy = @model.slice(0)
-
     # For data index in DOM
     for i in [0...@model.length]
       item = @$el.children()[i]
@@ -113,4 +134,4 @@ module.exports = class PojoListView extends Backbone.View
     for itemView in @itemViews
       if itemView
         itemView.remove()
-    super()
+    super()  

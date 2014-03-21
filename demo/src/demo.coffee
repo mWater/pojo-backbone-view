@@ -1,7 +1,7 @@
-PojoListView = require('../../index.js').PojoListView
-Backbone = require 'backbone'
 $ = require 'jquery'
+Backbone = require 'backbone'
 Backbone.$ = $
+PojoListView = require('../../index.js').PojoListView
 
 fruits = ['apple', 'orange', 'banana']
 
@@ -12,11 +12,11 @@ class FruitView extends Backbone.View
     return this
 
 # Make a class to render a list
-class FruitListView extends PojoListView
+class FruitListView extends PojoListView	  
   createItemView: (item, index) ->
-    return new FruitView(model:item).render()
+    return new FruitView(model:item).render()    
 
-view = new FruitListView(model:fruits)
+view = new FruitListView(model:fruits, sortable:"true", sortHandle:"false")
 view.render()
 
 $("body").append(view.el)
