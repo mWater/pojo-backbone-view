@@ -1,3 +1,5 @@
 lib/*
 node_modules
 test/browserified.js
+/bower_components/
+/lib/

@@ -2,8 +2,13 @@ $ = require 'jquery'
 Backbone = require 'backbone'
 htmlPreserver = require './htmlPreserver'
 
+# Require in sortable
+require '../bower_components/html.sortable/dist/html.sortable.0.1.1.js'
+
 # Assumes that order of views might be important, so re-creates all on re-order
 # To use, implement createItemView(item, zeroBasedIndex)
+# Set sortable: true to allow drag&drop sorting
+# Set sortHAndle to css selector to specify handle
 
 module.exports = class PojoListView extends Backbone.View
   tagName: "ul"
@@ -14,8 +19,19 @@ module.exports = class PojoListView extends Backbone.View
     # Save ctx option as nested views often need a context
     @ctx = options.ctx
 
+    # Save sorting options
+    @sortable = options.sortable || false
+    @sortHandle = options.sortHandle
+
     @itemViews = []
     @itemModels = []
+
+    # Set up sorting
+    if @sortable
+      @$el.sortable({
+        handle: @sortHandle
+        forcePlaceholderSize: true
+      }).bind('sortupdate', @reorder)
 
   render: ->
     # Save focus and scroll
@@ -66,6 +82,10 @@ module.exports = class PojoListView extends Backbone.View
 
     # Save item models
     @itemModels = @model.slice(0)
+
+    # Set up sorting
+    if @sortable
+      @$el.sortable('reload')
 
     return this
 

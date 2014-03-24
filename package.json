@@ -15,6 +15,7 @@
     "backbone",
     "dirtychecking"
   ],
+  "style": "./index.css",
   "author": "Clayton Grassick",
   "license": "GPLv3",
   "bugs": {
