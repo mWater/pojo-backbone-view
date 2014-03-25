@@ -19,19 +19,22 @@ module.exports = class PojoListView extends Backbone.View
     # Save ctx option as nested views often need a context
     @ctx = options.ctx
 
-    # Save sorting options
-    @sortable = options.sortable || false
-    @sortHandle = options.sortHandle
-
     @itemViews = []
     @itemModels = []
 
     # Set up sorting
-    if @sortable
-      @$el.sortable({
-        handle: @sortHandle
-        forcePlaceholderSize: true
-      }).bind('sortupdate', @reorder)
+    if options.sortable
+      @makeSortable(handle: options.sortHandle)
+
+  # Make the list drag sortable. Pass handle to options as css selector if should
+  # only drag on handle. Call before or after render
+  makeSortable: (options) ->
+    @sortable = true
+
+    @$el.sortable({
+      handle: options.handle
+      forcePlaceholderSize: true
+    }).bind('sortupdate', @reorder)
 
   render: ->
     # Save focus and scroll

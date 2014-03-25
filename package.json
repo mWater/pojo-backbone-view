@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "testem ci",
-    "prepublish": "coffee -c -o lib src/*.coffee"
+    "prepublish": "coffee -c -o lib src/*.coffee && cp src/*.js lib"
   },
   "repository": {
     "type": "git",
