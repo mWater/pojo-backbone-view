@@ -3,7 +3,7 @@ Backbone = require 'backbone'
 htmlPreserver = require './htmlPreserver'
 
 # Require in sortable
-require '../bower_components/html.sortable/dist/html.sortable.0.1.1.js'
+require './html.sortable.js'
 
 # Assumes that order of views might be important, so re-creates all on re-order
 # To use, implement createItemView(item, zeroBasedIndex)
