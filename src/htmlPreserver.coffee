@@ -42,7 +42,8 @@ exports.replaceHtml = (element, html) ->
   for input in $(element).find(focusables)
     # Only those with id can be preserved
     # Select2 must be handled separately
-    if input.id and not $(input).hasClass("select2-offscreen")
+    # If multiple with same id, ignore
+    if input.id and not $(input).hasClass("select2-offscreen") and not $(input).hasClass("select2-input") and $(element).find("#" + input.id).length == 1
       # Find matching input in old element
       savedElems[input.id] = $(input).detach()
 

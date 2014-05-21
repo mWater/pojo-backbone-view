@@ -42,6 +42,9 @@ module.exports = class PojoView extends Backbone.View
     @subViews.push subView
     @renderNeeded = true
 
+  getSubView: (id) ->
+    return _.findWhere(@subViews, { id: id }).view
+
   _processSubView: (subView, $el, renderOnlySelf = false) ->
     # If model changed object, recreate view
     subModel = if subView.modelFunc? then subView.modelFunc(@model) else null
