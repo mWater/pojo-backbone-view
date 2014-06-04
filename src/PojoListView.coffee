@@ -120,6 +120,9 @@ module.exports = class PojoListView extends Backbone.View
     @trigger 'change'
 
   remove: ->
+    if @sortable
+      @$el.sortable('destroy')
+
     for itemView in @itemViews
       if itemView
         itemView.remove()
