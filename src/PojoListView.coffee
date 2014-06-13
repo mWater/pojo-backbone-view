@@ -6,7 +6,7 @@ htmlPreserver = require './htmlPreserver'
 require './html.sortable.js'
 
 # Assumes that order of views might be important, so re-creates all on re-order
-# To use, implement createItemView(item, zeroBasedIndex)
+# To use, implement factory(itemList, zeroBasedIndex)
 # Set sortable: true to allow drag&drop sorting
 # Set sortHandle to css selector to specify handle
 
@@ -36,58 +36,86 @@ module.exports = class PojoListView extends Backbone.View
       forcePlaceholderSize: true
     }).bind('sortupdate', @reorder)
 
-  render: ->
+  createItemView: (index) =>
+    # Create new element
+    @itemViews[index] = @factory(@model, index)
+
+    # Listen to change events
+    @itemViews[index].on 'change', =>
+      # Render list
+      @render(true)
+
+      # Render other sub-items
+      for i in [0...@model.length]
+        if i != index
+          @itemViews[i].render()
+
+      # Bubble up event
+      @trigger 'change'
+
+    # Return new view for convenience
+    return @itemViews[index]
+
+  render: (onlySelf = false) ->
+    reloadSortNeeded = false
+
     # Save focus and scroll
     htmlPreserver.preserveFocus =>
+      # Remove excess itemViews
+      if @model.length < @itemViews.length
+        # Remove item views
+        for i in [@model.length...@itemViews.length]
+          @itemViews[i].remove()
+
+          # Remove holder element
+          @$el.children("li").eq(i).remove()
+
+        # Trim arrays
+        excess = @itemViews.length - @model.length
+        @itemViews.splice(@model.length, excess)
+        @itemModels.splice(@model.length, excess)
+
+      # Add new items as needed
+      if @model.length > @itemViews.length
+        reloadSortNeeded = true
+
+        for i in [@itemViews.length...@model.length]
+          # Create item element
+          itemElem = $('<li data-index="'+i+'"></li>')
+          if @itemClass
+            itemElem.addClass(@itemClass)
+
+          # Create item view
+          @createItemView(i)
+
+          # Add itemView to item
+          itemElem.append(@itemViews[i].$el)
+
+          # Add item element to list
+          @$el.append(itemElem) 
+
       # For each model item
       for i in [0...@model.length]
         # Check if item model is same
         if @itemModels[i] == @model[i]
-          # Render itemView
-          @itemViews[i].render()
-
-          # Detach element
-          @itemViews[i].$el.detach()
+          # Render itemView unless only self
+          if not onlySelf
+            @itemViews[i].render()
         else
+          reloadSortNeeded = true
+
           # Remove old view
           if @itemViews[i]?
             @itemViews[i].remove()
 
-          # Create new element
-          @itemViews[i] = @createItemView(@model[i], i)
-
-          # Listen to change events
-          @itemViews[i].on 'change', =>
-            @render()
-            @trigger 'change'
-
-      # Remove excess itemViews
-      for i in [@model.length...@itemViews.length]
-        @itemViews[i].remove()
-
-      # Truncate itemViews array
-      if @model.length<@itemViews.length
-        @itemViews.splice(@model.length, @itemViews.length - @model.length)
-
-      # Create template for each model item
-      @$el.empty()
-
-      for i in [0...@model.length]
-        # Create item
-        item = $('<li data-index="'+i+'"></li>')
-        if @itemClass
-          item.addClass(@itemClass)
-
-        # Add itemView to item
-        item.append(@itemViews[i].$el)
-
-        @$el.append(item) 
+          # Recreate view
+          @$el.children("li").eq(i).append(@createItemView(i).$el)
 
     # Save item models
     @itemModels = @model.slice(0)
 
     # Refresh sorting
-    if @sortable
+    if @sortable and reloadSortNeeded
       @$el.sortable('reload')
 
     return this

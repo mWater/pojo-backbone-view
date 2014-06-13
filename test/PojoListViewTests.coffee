@@ -10,8 +10,8 @@ Backbone.$ = $
 class SimpleView extends Backbone.View
 
 class SimpleListView extends PojoListView
-  createItemView: (item) ->
-    return new SimpleView(model:item)
+  factory: (items, index) ->
+    return new SimpleView(model: items[index])
 
 describe 'PojoListView', ->
   beforeEach ->
@@ -25,8 +25,8 @@ describe 'PojoListView', ->
     # Remove second item and re-render
     @list.splice(1, 1)
     @listView.render()
-    assert @listView.$("li").length == 2
-    assert @listView.itemViews.length == 2
+    assert.equal @listView.$("li").length, 2
+    assert.equal @listView.itemViews.length, 2
 
   it "removes item view on item removal", ->
     spy1 = sinon.spy(@listView.itemViews[0], "remove")      
@@ -94,13 +94,35 @@ describe 'PojoListView', ->
 
     assert spy.calledOnce
 
+  it 'renders other items on item change', ->
+    spy = sinon.spy(@listView.itemViews[1], "render")
+
+    # Indicate change
+    @listView.itemViews[0].trigger 'change'
+
+    assert spy.calledOnce
+
+  it "does not render originating items change", ->
+    spy = sinon.spy(@listView.itemViews[0], "render")
+
+    # Indicate change
+    @listView.itemViews[0].trigger 'change'
+
+    assert not spy.called
+
+  it 'renders all items on render', ->
+    spy = sinon.spy(@listView.itemViews[0], "render")
+
+    @listView.render()
+    assert spy.calledOnce
+
   it "rerenders when dirty is called", ->
     spy = sinon.spy(@listView, "render")
 
     @listView.dirty()
     assert spy.calledOnce
 
-  it "triggers change when changed is called", ->
+  it "triggers change when dirty is called", ->
     changed = false
     @listView.on 'change', -> changed = true
 
