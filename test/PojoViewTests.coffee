@@ -16,8 +16,7 @@ class SimpleView extends Backbone.View
     @$el.html(@model)
 
 class SimplePojoView extends PojoView
-  template: ->
-    'xyz<div id="a"></div><div id="b"></div>'
+  template: require('./TestTemplate.hbs')
 
 describe "PojoView", ->
   beforeEach ->
@@ -25,62 +24,54 @@ describe "PojoView", ->
     @pview = new SimplePojoView(model: @model).render()
 
   it "adds subviews", ->
-    @pview.addSubView "a", -> 
-      new SimpleView(model:"A")
-    , (model) -> model.a
-
-    @pview.addSubView "b", -> 
-      new SimpleView(model:"B")
-
+    @pview.addSubView { id: "a", factory: -> new SimpleView(model:"A") }
+    @pview.addSubView { id: "b", factory: -> new SimpleView(model:"B") }
     @pview.render()
 
     assert.match @pview.$el.html(), /A/
 
-  it "does not re-render on unchanged model", ->
-    spy = sinon.spy(@pview, "template")
+  it "renders template with data", ->
+    @model.x = "alpha"
+    @model.y = "beta"
+    @pview.render()
+    assert.match @pview.$el.html(), /alpha/
+    assert.match @pview.$el.html(), /beta/
 
+  it "re-renders on changed data", ->
+    @model.x = "alpha"
+    @model.y = "beta"
+    @pview.render()
+    @model.x = "gamma"
+    @pview.render()
+    assert.match @pview.$el.html(), /gamma/
+
+  it "does not re-render on unchanged data", ->
+    @model.x = "alpha"
+    @model.y = "beta"
+    @pview.render()
+    @pview.template = null # Make erroneous
     @pview.render()
 
-    assert not spy.called
+  it "calls postTemplate if present", ->
+    called = false
+    @pview.postTemplate = ->
+      called = true
 
-  it "does re-render on changed model", ->
-    spy = sinon.spy(@pview, "template")
-
-    @pview.model.b = 2
+    @model.x = "alpha"
     @pview.render()
+    assert.isTrue called
 
-    assert spy.calledOnce
+  it "uses data function if specified", ->
+    @pview.data = ->
+      return { x: "theta" }
 
-  it "respects scope unchanged", ->
-    @pview.scope = -> {x:1}
     @pview.render()
-
-    spy = sinon.spy(@pview, "template")
-
-    @pview.model.b = 2
-    @pview.render()
-
-    assert not spy.called
-
-  it "respects scope changed", ->
-    @pview.scope = -> {x:1}
-    @pview.render()
-
-    spy = sinon.spy(@pview, "template")
-
-    @pview.scope = -> {x:2}
-    @pview.render()
-
-    assert spy.calledOnce
+    assert.match @pview.$el.html(), /theta/    
 
   context "with subViews", ->
     beforeEach ->
-      @pview.addSubView "a", -> 
-        new SimpleView(model:"A")
-      , (model) -> model.a
-
-      @pview.addSubView "b", -> 
-        new SimpleView(model:"B")
+      @pview.addSubView { id: "a", factory: (-> new SimpleView(model:"A")), scope: (model) -> model.a }
+      @pview.addSubView { id: "b", factory: -> new SimpleView(model:"B") }
 
       @pview.render()
 
@@ -98,12 +89,12 @@ describe "PojoView", ->
       @pview.render()
       assert oldSubView != @pview.subViews[0].view
 
-    it "recreates subviews with no modelFunc", ->
+    it "does not recreate subviews with no scope", ->
       oldSubView = @pview.subViews[1].view
 
       @pview.model.a = { x: 2 }
       @pview.render()
-      assert oldSubView != @pview.subViews[1].view
+      assert oldSubView == @pview.subViews[1].view
 
     it "rerenders subviews on render", ->
       spy = sinon.spy(@pview.subViews[0].view, "render")      
@@ -147,8 +138,7 @@ describe "PojoView", ->
     it "replaces subviews with same name", ->
       spy1 = sinon.spy(@pview.subViews[1].view, "remove")
 
-      @pview.addSubView "b", -> 
-        new SimpleView(model:"C")
+      @pview.addSubView { id: "b", factory: -> new SimpleView(model:"C") }
 
       @pview.render()
 
@@ -180,10 +170,7 @@ describe "PojoView", ->
 
   context "with null subView", ->
     beforeEach ->
-      @pview.addSubView "a", -> 
-        return null
-      , (model) -> model.a
-
+      @pview.addSubView { id: "a", factory: -> return null }
       @pview.render()
 
     it "does renders fine", ->

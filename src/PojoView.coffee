@@ -10,33 +10,33 @@ module.exports = class PojoView extends Backbone.View
     # Save ctx option as nested views often need a context
     @ctx = options.ctx
     
-    @subViews = []  # Each contains id, factory, modelFunc, model, view
+    @subViews = []  # Each contains id, factory, scope, model, view
 
     @renderNeeded = false  # Set true when render is needed due to subview manipulation
 
-  scope: ->
-    return @model
+  data: -> return @model
 
   # Add a subView. Render must be called after.
   # id is the DOM id where the subview will be inserted
   # factory takes a submodel parameter (from modelFunc) and produces a view
-  # modelFunc is a function which produces the model object used to determine
+  # scope is a function which produces the model object used to determine
   #  if the subview should be recreated. If not specified, subview will always
-  #  be recreated on render
-  addSubView: (id, factory, modelFunc) ->
+  #  be recreated on render. scope object is tested for === equality, not deep equal
+  addSubView: (options) ->
     # Check for existing id
-    existing = _.find(@subViews, { id: id })
+    existing = _.find(@subViews, { id: options.id })
     if existing?
       if existing.view?
         existing.view.remove()
       @subViews.splice(@subViews.indexOf(existing), 1)
 
     subView =  { 
-      id: id
-      factory: factory
-      modelFunc: modelFunc
+      id: options.id
+      factory: options.factory
+      scope: options.scope
       model: undefined
       view: undefined
+      scopeObj: if options.scope then options.scope(@model) else null
     }
 
     @subViews.push subView
@@ -46,17 +46,20 @@ module.exports = class PojoView extends Backbone.View
     return _.findWhere(@subViews, { id: id }).view
 
   _processSubView: (subView, $el, renderOnlySelf = false) ->
-    # If model changed object, recreate view
-    subModel = if subView.modelFunc? then subView.modelFunc(@model) else null
-    if not subModel? or subView.model != subModel
+    # If scope changed, recreate view
+    newScopeObj = if subView.scope then subView.scope(@model) else null
+    
+    # If model changed object, or view doesn't exist, recreate view
+    if subView.scopeObj != newScopeObj or not subView.view?
       # Remove old view
       if subView.view?
         subView.view.remove()
 
-      subView.view = subView.factory(subModel)
+      # Create new view
+      subView.view = subView.factory(newScopeObj)
 
-      # Listen to change events
       if subView.view?
+        # Listen to change events
         subView.view.on 'change', =>
           changedView = subView
 
@@ -68,6 +71,7 @@ module.exports = class PojoView extends Backbone.View
           # Render only self
           @render(true)
 
+          # Bubble change event up
           @trigger 'change'
     else
       # Just render existing subView
@@ -79,8 +83,8 @@ module.exports = class PojoView extends Backbone.View
       subViewEl = $el.find("#" + subView.id)
       subViewEl.replaceWith(subView.view.$el.detach())
 
-    # Save subview model
-    subView.model = subModel
+    # Save subview scope
+    subView.scopeObj = newScopeObj
 
   renderSubViews: ->
     for subView in @subViews
@@ -92,8 +96,10 @@ module.exports = class PojoView extends Backbone.View
     @render()
 
   render: (renderOnlySelf = false) ->
-    # Check if model changed
-    if not @renderNeeded and _.isEqual(@scope(), @savedScope)
+    # Check if data changed
+    currentData = @data()
+
+    if not @renderNeeded and _.isEqual(currentData, @savedData)
       # Just render subViews
       if not renderOnlySelf
         @renderSubViews()
@@ -109,14 +115,17 @@ module.exports = class PojoView extends Backbone.View
           subView.view.$el.detach()
 
       # Apply template, preserving state
-      htmlPreserver.replaceHtml(@$el, @template(@model))
+      htmlPreserver.replaceHtml(@$el, @template(currentData))
 
       # For each subview
       for subView in @subViews
         @_processSubView subView, @$el, renderOnlySelf
 
+      if @postTemplate
+        @postTemplate()
+
     # Save model scope
-    @savedScope = _.cloneDeep(@scope())
+    @savedData = _.cloneDeep(currentData)
 
     return this
 
