@@ -61,6 +61,15 @@ describe "PojoView", ->
     @pview.render()
     assert.isTrue called
 
+  it "calls preTemplate if present", ->
+    called = false
+    @pview.preTemplate = ->
+      called = true
+
+    @model.x = "alpha"
+    @pview.render()
+    assert.isTrue called
+
   it "uses data function if specified", ->
     @pview.data = ->
       return { x: "theta" }

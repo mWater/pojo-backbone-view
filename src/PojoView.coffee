@@ -120,6 +120,9 @@ module.exports = class PojoView extends Backbone.View
         if subView.view?
           subView.view.$el.detach()
 
+      if @preTemplate
+        @preTemplate(currentData)
+
       # Apply template, preserving state
       htmlPreserver.replaceHtml(@$el, @template(currentData))
 
