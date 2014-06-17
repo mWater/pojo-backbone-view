@@ -42,7 +42,7 @@ module.exports = class PojoListView extends Backbone.View
     @itemModels[index] = @model[index]
 
     # Listen to change events
-    @itemViews[index].on 'change', =>
+    @listenTo @itemViews[index], 'change', =>
       # Render list
       @render(true)
 
@@ -141,7 +141,7 @@ module.exports = class PojoListView extends Backbone.View
     @itemViews.splice(0, @itemViews.length)
     @itemModels.splice(0, @itemModels.length)
     @$el.children("li").remove()
-    
+
     @render()
 
     @trigger 'change'

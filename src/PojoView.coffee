@@ -66,7 +66,7 @@ module.exports = class PojoView extends Backbone.View
 
       if subView.view?
         # Listen to change events
-        subView.view.on 'change', =>
+        @listenTo subView.view, 'change', =>
           changedView = subView
 
           # Render all other views
