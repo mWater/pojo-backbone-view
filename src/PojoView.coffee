@@ -106,9 +106,11 @@ module.exports = class PojoView extends Backbone.View
     currentData = @data()
 
     if not @renderNeeded and _.isEqual(currentData, @savedData)
-      # Just render subViews
+      # Just process subviews
       if not renderOnlySelf
-        @renderSubViews()
+        # For each subview
+        for subView in @subViews
+          @_processSubView subView, @$el, renderOnlySelf
       return this
 
     @renderNeeded = false

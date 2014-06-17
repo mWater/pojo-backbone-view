@@ -17,6 +17,7 @@ class SimpleView extends Backbone.View
 
 class SimplePojoView extends PojoView
   template: require('./TestTemplate.hbs')
+  data: -> { x: @model.x, y: @model.y }
 
 describe "PojoView", ->
   beforeEach ->
