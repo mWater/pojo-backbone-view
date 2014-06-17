@@ -51,7 +51,7 @@ module.exports = class PojoView extends Backbone.View
   getSubView: (id) ->
     return _.findWhere(@subViews, { id: id }).view
 
-  _processSubView: (subView, $el, renderOnlySelf = false) ->
+  _processSubView: (subView, $el, renderOnlySelf, reattach) ->
     # If scope changed, recreate view
     newScopeObj = if subView.scope then subView.scope(@model) else null
     
@@ -79,15 +79,20 @@ module.exports = class PojoView extends Backbone.View
 
           # Bubble change event up
           @trigger 'change'
+
+      # Insert view
+      if subView.view
+        subViewEl = $el.find("#" + subView.id)
+        subViewEl.append(subView.view.$el)
     else
-      # Just render existing subView
+      # Render existing subView
       if subView.view? and not renderOnlySelf
         subView.view.render()
 
-    # Insert view
-    if subView.view?
-      subViewEl = $el.find("#" + subView.id)
-      subViewEl.replaceWith(subView.view.$el.detach())
+      # Detach and reattach
+      if subView.view? and reattach
+        subViewEl = $el.find("#" + subView.id)
+        subViewEl.append(subView.view.$el.detach())
 
     # Save subview scope
     subView.scopeObj = newScopeObj
@@ -110,7 +115,7 @@ module.exports = class PojoView extends Backbone.View
       if not renderOnlySelf
         # For each subview
         for subView in @subViews
-          @_processSubView subView, @$el, renderOnlySelf
+          @_processSubView subView, @$el, renderOnlySelf, false
       return this
 
     @renderNeeded = false
@@ -130,7 +135,7 @@ module.exports = class PojoView extends Backbone.View
 
       # For each subview
       for subView in @subViews
-        @_processSubView subView, @$el, renderOnlySelf
+        @_processSubView subView, @$el, renderOnlySelf, true
 
       if @postTemplate
         @postTemplate(currentData)
