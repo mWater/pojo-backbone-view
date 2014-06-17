@@ -23,6 +23,12 @@ module.exports = class PojoView extends Backbone.View
   #  if the subview should be recreated. If not specified, subview will always
   #  be recreated on render. scope object is tested for === equality, not deep equal
   addSubView: (options) ->
+    if not options.id
+      throw new Error("id required")
+
+    if not options.factory
+      throw new Error("factory required")
+
     # Check for existing id
     existing = _.find(@subViews, { id: options.id })
     if existing?
@@ -122,7 +128,7 @@ module.exports = class PojoView extends Backbone.View
         @_processSubView subView, @$el, renderOnlySelf
 
       if @postTemplate
-        @postTemplate()
+        @postTemplate(currentData)
 
     # Save model scope
     @savedData = _.cloneDeep(currentData)

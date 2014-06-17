@@ -39,6 +39,7 @@ module.exports = class PojoListView extends Backbone.View
   createItemView: (index) =>
     # Create new element
     @itemViews[index] = @factory(@model, index)
+    @itemModels[index] = @model[index]
 
     # Listen to change events
     @itemViews[index].on 'change', =>
@@ -133,8 +134,14 @@ module.exports = class PojoListView extends Backbone.View
       @model[i] = modelCopy[parseInt($(item).data("index"))]
 
     # Remove all item views and models to force recreation
+    for itemView in @itemViews
+      if itemView
+        itemView.remove()
+
     @itemViews.splice(0, @itemViews.length)
     @itemModels.splice(0, @itemModels.length)
+    @$el.children("li").remove()
+    
     @render()
 
     @trigger 'change'
