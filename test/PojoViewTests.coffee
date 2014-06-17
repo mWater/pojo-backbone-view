@@ -185,3 +185,13 @@ describe "PojoView", ->
 
     it "does renders fine", ->
       assert.match @pview.$el.html(), /xyz/
+
+  context "with subViews containing id matching outer subview", ->
+    beforeEach ->
+      @pview.addSubView { id: "a", factory: -> new SimpleView(model:'<div id="c">') }
+      @pview.addSubView { id: "c", factory: -> new SimpleView(model:"C") }
+
+      @pview.render()
+
+    it "does not put subview inside other subview", ->
+      assert.notMatch @pview.$el.html(), /C/

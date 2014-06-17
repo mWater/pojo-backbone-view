@@ -82,8 +82,12 @@ module.exports = class PojoView extends Backbone.View
 
       # Insert view
       if subView.view
-        subViewEl = $el.find("#" + subView.id)
-        subViewEl.append(subView.view.$el)
+        subViewEls = $el.find("#" + subView.id)
+        # Find one that is not within a subview
+        for subViewEl in subViewEls
+          if not _.any(@subViews, (subView) =>
+            subView.view and $.contains(subView.view.el, subViewEl))
+            $(subViewEl).append(subView.view.$el)
     else
       # Render existing subView
       if subView.view? and not renderOnlySelf
@@ -91,8 +95,12 @@ module.exports = class PojoView extends Backbone.View
 
       # Detach and reattach
       if subView.view? and reattach
-        subViewEl = $el.find("#" + subView.id)
-        subViewEl.append(subView.view.$el.detach())
+        subViewEls = $el.find("#" + subView.id)
+        # Find one that is not within a subview
+        for subViewEl in subViewEls
+          if not _.any(@subViews, (subView) =>
+            subView.view and $.contains(subView.view.el, subViewEl))
+            $(subViewEl).append(subView.view.$el.detach())
 
     # Save subview scope
     subView.scopeObj = newScopeObj
