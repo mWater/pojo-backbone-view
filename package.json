@@ -1,6 +1,6 @@
 {
   "name": "pojo-backbone-view",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Backbone Views that use Plain Old Javascript Objects and dirty checking",
   "main": "index.js",
   "scripts": {
