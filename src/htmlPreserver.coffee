@@ -2,6 +2,7 @@
 # from previous rendering. If not done, focus and typing problems occur
 # when the template is re-rendered
 $ = require 'jquery'
+_ = require 'underscore'
 
 # Preserves focus and scroll when an action is preformed
 # In action function, call replaceHtml 
@@ -54,25 +55,19 @@ exports.replaceHtml = (element, html) ->
   for input in $(element).find(focusables)
     # Only those with id can be preserved
     if input.id and savedElems[input.id]?
-      oldInput = savedElems[input.id]
+      oldInput = savedElems[input.id][0]
 
-      # Get new attributes
-      attrs = input.attributes
+      # Get list of all attributes of new and old
+      attrNames = _.union(_.pluck(input.attributes, "name"), _.pluck(oldInput.attributes, "name"))
 
-      # Replace old attributes with new (except value, which must be done manually)
-      for attr in attrs
-        if attr.name isnt "value"
-          $(oldInput).attr(attr.name, attr.value)
+      # Replace old attributes with new
+      for attr in attrNames
+        if $(oldInput).prop(attr) != $(input).prop(attr)
+          $(oldInput).prop(attr, $(input).prop(attr))
 
       # Copy contents across for buttons and links and selects
       if input.tagName == "BUTTON" or input.tagName == "A" or input.tagName == "SELECT"
         $(oldInput).html($(input).html())        
-
-      # Copy value across if different
-      newValue = $(input).val()
-      oldValue = $(oldInput).val()
-      if oldValue != newValue
-        $(oldInput).val(newValue)
 
       # Replace new control with old
       $(input).replaceWith(oldInput)
