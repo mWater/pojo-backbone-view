@@ -18,7 +18,7 @@ module.exports = class PojoView extends Backbone.View
 
   # Add a subView. Render must be called after.
   # id is the DOM id where the subview will be inserted
-  # factory takes a submodel parameter (from modelFunc) and produces a view
+  # factory is a function which produces a view. It is called with result of scope function if present
   # scope is a function which produces the model object used to determine
   #  if the subview should be recreated. If not specified, subview will always
   #  be recreated on render. scope object is tested for === equality, not deep equal

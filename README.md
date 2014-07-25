@@ -20,15 +20,21 @@ There are two classes: PojoView and PojoListView.
 
 A view with optional nested sub-views. Subviews are re-rendered properly and are themselves nestable.
 
-To use, add `template` function that returns string or function that will be called with `{model: <model>}`
+To use, add `template` function that returns a handlebars template (compiled). It will be called with the results of the `data` function.
+
+`data` function should produce an object which is passed to the template
+
+Any post-render work can be done in `postTemplate` function which is passed results of `data` function
 
 To add sub-views, create empty div in template with sub view id (any string). Then call:
 
-`addSubView(id, factory, modelFunc)`
+`addSubView(options)`
 
-id: id of subview 
-factory: function which creates and returns subview (since we may have to re-create it if model object of subview changes) which is a Backbone view
-modelFunc: optional function which returns the model object on which the subview is based. If not specified, subview will be recreated on each render.
+Options
+id: the DOM id where the subview will be inserted
+factory: function which produces a view. It is called with result of scope function if scope is present
+scope: is a function which produces the object used to determine if the subview should be recreated.
+If not specified, subview will always be recreated on render. scope object is tested for === equality, not deep equal
 
 When the view modifies the model object, it *must* call dirty() afterwards which triggers a smart re-render of the entire tree of views. Views whose model has not changed are left alone.
 
