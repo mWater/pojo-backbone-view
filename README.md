@@ -44,12 +44,12 @@ Override `scope` function which by default returns the model to determine which 
 
 A view for Javascript arrays.
 
-To use, add createItemView function:
+To use, add factory function:
 
-createItemView(item, index) 
+`factory(item, index) `
 
-item: item of the array 
-index: 0-based index of the array item
+`item:` item of the array 
+`index`: 0-based index of the array item
 
 returns: new Backbone view
 
